@@ -323,7 +323,161 @@ JS引擎：解析和执行javascript来实现网页的动态效果。
 <script async>
 ```
 
+## 4,事件冒泡和事件捕获：
 
+* 事件冒泡
+
+1.事件冒泡： 如果一个元素的事件被触发 ，所有父级元素同名事件会被依次触发
+
+​        btn -> div -> body -> html -> document -> window
+
+ 2.事件冒泡一直就在我们身边，只是之前 我们没有 为 父元素 添加 同名事件而已！
+
+ 3.事件冒泡好处： 如果一个父元素中所有的子元素需要注册同名事件，只需要给父元素注册即可
+
+4.事件对象的一些属性介绍:
+
+   this: 谁调函数，函数中的this就代表谁 --- 事件源：指的 当前执行的事件处理函数 所属的 dom对象
+
+   e.currentTarget ： 和this一模一样，唯一的区别就是有兼容性。 以后用this是最多的
+
+   e.target : 真正的事件触发源 -- 真正触发这个事件的源头（子元素）  -- IE8 : e.srcElement 
+
+ 5.事件冒泡的影响： 需求产生冲突
+
+   新增需求：弹出登录框之后，点击页面空白区域隐藏登录框和bg
+
+   问题：点击link无法弹出登录框。  
+
+   原因：
+
+​     a.点击link之后出发它的事件弹出登录框 
+
+​     b.由于事件冒泡影响，会立即出发document的点击事件，登录框一出来就隐藏的
+
+​     解决：e.stopPropagation(); 阻断事件冒泡
+
+* 事件捕获
+
+事件捕获： 如果一个元素的事件被触发，会先触发最顶级的元素的同名事件，
+
+​    然后一级一级往下触发，直到目标元素
+
+​      window->document->html->body->父元素->事件源
+
+  事件捕获事件冒泡完全相反的过程
+
+  如何注册捕获阶段的事件:唯一方式：  addEventListener注册，第三个参数一定要是 true
+
+   IE没有捕获 addEventListener(事件名,事件处理函数，是否捕获阶段)
+
+阻止冒泡也可以阻止捕获
+
+ 事件的三个阶段:
+
+​    捕获阶段  目标阶段  冒泡阶段
+
+​    排列显示: 捕获阶段最先显示(从大到小)  目标(被触发事件)  冒泡阶段(从小到大)
+
+## 5,同源策略
+
+A网页设置的 Cookie，B网页不能打开，除非这两个网页"同源"。所谓"同源"指的是"三个相同"。协议,端口,域名相同
+
+同源政策的目的，是为了保证用户信息的安全，防止恶意的网站窃取数据。
+
+如何解决跨域:
+
+1、 通过jsonp跨域
+
+```
+//原生
+<script>
+    var script = document.createElement('script');
+    script.type = 'text/javascript';
+
+    // 传参一个回调函数名给后端，方便后端返回时执行这个在前端定义的回调函数
+    script.src = 'http://www.domain2.com:8080/login?user=admin&callback=handleCallback';
+    document.head.appendChild(script);
+
+    // 回调执行函数
+    function handleCallback(res) {
+        alert(JSON.stringify(res));
+    }
+ </script>
+ //jquery ajax：
+ $.ajax({
+    url: 'http://www.domain2.com:8080/login',
+    type: 'get',
+    dataType: 'jsonp',  // 请求方式为jsonp
+    jsonpCallback: "handleCallback",    // 自定义回调函数名
+    data: {}
+});
+//vue.js：
+this.$http.jsonp('http://www.domain2.com:8080/login', {
+    params: {},
+    jsonp: 'handleCallback'
+}).then((res) => {
+    console.log(res); 
+})
+//jsonp缺点：只能实现get一种请求。
+```
+
+2、 document.domain + iframe跨域
+
+此方案仅限主域相同，子域不同的跨域应用场景。
+
+实现原理：两个页面都通过js强制设置document.domain为基础主域，就实现了同域。
+
+1.）父窗口：(http://www.domain.com/a.html)
+
+```
+<iframe id="iframe" src="http://child.domain.com/b.html"></iframe>
+<script>
+    document.domain = 'domain.com';
+    var user = 'admin';
+</script>
+```
+
+2.）子窗口：(http://child.domain.com/b.html)
+
+```
+<script>
+    document.domain = 'domain.com';
+    // 获取父窗口中变量
+    alert('get js data from parent ---> ' + window.parent.user);
+</script>
+```
+
+3、 location.hash + iframe
+4、 window.name + iframe跨域
+5、 postMessage跨域
+6、 跨域资源共享（CORS）
+7、 nginx代理跨域
+8、 nodejs中间件代理跨域
+9、 WebSocket协议跨域
+
+## 6,HTML的优点和缺点
+
+优点:
+
+* 网络标准统一,由W3C网推荐
+
+* 多设备,跨平台
+
+* 即时更新
+
+* 提高可用性和改进用户的友好体验
+
+* 涉及到网站的抓取和索引的时候,对于SEO很友好
+
+* 可以给站点带来更多的多媒体元素
+
+缺点:
+
+* 安全:同事web Storage,web Socket这样的功能很容易被黑客利用,来盗取用户的信息和资料
+* 完善性,许多特性各浏览器的支持成都也不一样
+* 性能:某些平台的引擎问题导致html5性能低下
+* 浏览器兼容问题:iE9以下浏览器几乎全军覆没
 
 # css
 
@@ -349,7 +503,7 @@ JS引擎：解析和执行javascript来实现网页的动态效果。
 
 .list>li:last-child     选中最后一个子元素
 
-.list>li:nth-child(n)  选中第五个子元素
+.list>li:nth-child(n)  选中第n个子元素
 
 .list>li:nth-child(odd)  选中偶数行
 
@@ -441,11 +595,11 @@ rotateX()方法，围绕其在一个给定度数X轴旋转的元素。Eg：trans
 
 ### 1.5 css3过渡效果
 
-![](D:\workSpace\noteBook\css01.png)
+![](D:\workSpace\noteBook\images\css01.png)
 
 ### 1.6 css3帧动画
 
-![](D:\workSpace\noteBook\css02.png)
+![](D:\workSpace\noteBook\images\css02.png)
 
 ### 1.7 渐变（Gradients）
 
@@ -461,7 +615,7 @@ rotateX()方法，围绕其在一个给定度数X轴旋转的元素。Eg：trans
 
 column-count 属性指定了需要分割的列数
 
-![](D:\workSpace\noteBook\css03.png)
+![](D:\workSpace\noteBook\images\css03.png)
 
 ## 2,rgba()和opacity的透明效果有什么不同
 
@@ -1276,4 +1430,274 @@ var arr = ['a','ab','a'];
 console.log(arr.inArray('b'));//false
 console.log(arr.inArray('a'));//true
 ```
+
+## 3,对象常用方法
+
+* charAt  :(1) 返回对应下标的字符
+* ndexOf  返回对应字符的下标,如果找不到字符,就返回-1;如果有多个相同的目标字符,返回第一个匹配字符的下标
+* lastIndexOf  返回对应的最后一个字符的下标
+* concat 连接字符串
+* replace()  替换指定的字符串
+* Split()  将字符串按照分隔符拆成若干个元素,存入数组,并返回[数组]
+* substr(index,count)  从指定下标复制取出count字符,并返回
+* substring(beginIndex,endIndex)  截取范围:beginIndex  <=x  <endIndex
+* toUpperCase() 将字符串中所有英文字母转成大写
+* toLowerCase() 将字符串所有英文字母都转成小写
+
+## 4,事件绑定和普通事件有什么区别
+
+普通添加事件:
+
+```
+var btn = document.getElementById("hello");
+btn.onclick = function(){
+	alert(1);
+}
+btn.onclick = function(){
+	alert(2);
+}
+//代码只会执行alert(2)
+```
+
+事件绑定:
+
+```
+var btn = document.getElementById("hello");
+btn.addEventListener("click",function(){
+	alert(1);
+},false);
+btn.addEventListener("click",function(){
+	alert(2);
+},false);
+//结果:alert(1)之后,再alert(2)
+```
+
+普通添加事件的方法不支持添加多个事件，最下面的事件会覆盖上面的，而事件绑定（addEventListener）方式添加事件可以添加多个。
+
+addEventListener不兼容低版本IE
+
+普通事件无法取消
+
+addEventLisntener还支持事件冒泡+事件捕获
+
+## 5,构造函数new的执行原理
+
+分为四个步骤:
+
+A 创建空对象{}      
+
+B  this指向这个对象:this={}
+
+C 执行构造函数赋值代码  
+
+D  自动返回这个对象
+
+this的指向:谁调用我,我就指向谁; 全局函数:指向window;对象的方法:指向对象; 构造函数:指向new创建的空对象;this指向取决与函数是如何调用的,跟函数的声明是没有任何关系的
+
+**如何修改this的指向**(上下文模式):
+
+* call()  [语法]  函数名.call(要修改的this,arg1,arg2...)
+
+* apply()  [语法]  函数名.apply(要修改的this,参数数组/伪数组)
+
+  适用场景:函数原本有多个形参.
+
+* bind()  [语法]  函数名.call(要修改的this,arg1,arg2...)
+
+  特点:不会立即执行这个函数,而是返回一个修改this之后的新函数.适用场景:定时器,事件处理函数.
+
+注意点:修改的this一定是引用类型(数组,函数,对象)
+
+(1)指向基本数据类型 string boolean number(包装类型)
+
+会自动帮我们转成对应的包装类型
+
+New String()  new Boolean()  new Number()
+
+(2) undefined null
+
+修改无效,还是默认的window
+
+**将伪数组转成数组**:
+
+1)固定语法:数组.push.apply(数组,伪数组)
+
+```
+var weiArr = {
+0:'alice',
+1:'judy',
+2:'linda',
+3:'lisa',
+length:4,
+}
+var arr1=[];
+arr1.push.apply(arr1,weiArr);
+console.log(arr1);
+```
+
+2)slice和call
+
+数组.slice(start,end)  返回 start <= 范围 <end
+
+如果传参0或者不传,返回数组自身
+
+思路:如果伪数组也可以调用slice,不传参数.不久返回真数组了吗?
+
+```
+var arr = Array.prototype.slice.call(weiArr);//伪数组的原型没有slice方法.所以不能直接weiArr.slice()
+console.log(arr);
+```
+
+详细过程:
+
+![](D:\workSpace\noteBook\images\js03.png)
+
+## 6,原型及原型链
+
+原型出现的前提:发现构造函数的弊端:浪费内存资源;使用函数解决内存资源浪费  造成全局变量污染;引入对象:同时解决内存资源浪费 与 全局变量污染.
+
+原型的三个属性:
+
+* **prototype(原型)**:每一个函数在被创建的时候,系统会自动帮我们创建一个与之对应的对象,这个对象称之为原型.
+
+   作用:同时解决内存资源浪费 与 全局变量污染
+
+   如何获取原型对象:语法 构造函数.protoype
+
+   谁可以访问原型总的数据
+
+​      A,函数自身
+
+​      B,这个构造函数 实例化(创建) 的每一个对象
+
+* **\__proto__**:属于实例化对象,指向自身原型对象
+
+​       作用 :可以让实例化对象访问原型中的成员(属性+方法). 
+
+​       注意:开发中千万不要使用,因为不是W3C标准属性.
+
+* **constructor**:属于原型对象,指向的是构造函数
+
+​     作用 : 可以让实例化对象知道自己被哪个构造函数创建
+
+​     注意点 :  原型重新赋值会丢失
+
+**原型链**:
+
+每一个对象都有\__proto__指向自身的原型,而原型也是对象,也有自己的原型,以此类推,形成一种链式结构,称之为原型链.
+
+对象访问原型链成员规则:就近原则:
+
+当对象访问原型的成员,先看看自己有没有,如果过有则访问(取值+赋值),没有找原型,如果过原型则访问原型,如果过原型没有则访问原型的原型,以此类推一直到原型链最顶端.如果过还没有.属性则返回undefined,方法则报错:XXX is not  a  function.
+
+原型与构造函数关系:
+
+* 只要是构造函数就有`prototype`属性指向自身的原型对象
+
+* 只要是原型对象就有`constructor`属性指向对应的构造函数
+
+* 只要是对象就有`_proto_`属性指向与之相应的构造函数的原型对象,特殊情况:Object.prototype的原型对象是null
+
+* 函数本身也是对象
+
+DOM原型链:
+
+![](D:\workSpace\noteBook\images\js01.png)
+
+**完整原型链**:
+
+作用:了解 构造函数,原型对象,实例化对象三者的关系.
+
+关系:js中所有的对象都是构造函数创建,不同的对象是不同的构造函数.
+
+总结:不同的对象是不同的构造函数创建:
+
+ 1,函数对象是Function构造函数创建
+
+ 2,原型对象是Object构造函数创建
+
+ 3,实例对象是对应的构造函数创建.
+
+![](D:\workSpace\noteBook\images\js02.png)
+
+原型链中所有的对象最终的原型都会指向object的原型,这就意味着,所有的对象都能访问 Object.prototype
+
+**Object.prototype**：
+
+* hasOwnProperty:对象是否有某个成员
+
+   [语法]  对象名.hasOwnProperty(‘属性名’)  true:有  false:没有
+
+   作用:检查一个成员 是自己的 还是原型的
+
+*  isPrototypeOf :检测一个对象是不是另一个对象的原型
+
+   [语法]  A对象.isPrototypeOf(B对象)  A是不是B的原型  (A==B.__proto__)
+
+* propertyIsEnumerable():检测对象的成员是否可以被枚举
+
+     枚举必须满足两个条件:(1) 是自己的成员 (2) 可以被for-in遍历
+
+     数组的length:无法被for-in循环遍历
+
+**函数对象常用属性**：
+
+* caller:获取调用这个函数的引用 (谁调用了我)
+
+​      a. 如果在函数B中调用函数A，则函数A的caller就是函数B
+
+​      b. 如果在全局window中调用函数，函数的caller就是null
+
+* length:获取函数形参的数量
+
+*  name:获取函数名
+
+* arguments:获取所有的实参(伪数组->对象):
+
+  arguments--两个属性:
+
+     callee:返回函数自身
+
+     位移的场景:匿名函数递归调用
+
+     length:实参的数量
+
+*请说出 call caller callee的区别*:
+
+*call : 属于Function.prototype, 动态修改函数中的this指向*
+
+*caller : 属于函数对象 ， 获取调用函数的引用*
+
+*callee : 属于arguments，获取函数自身（匿名函数递归调用）*
+
+## 7,**instanceof关键字**
+
+Instanceof运算符:对象 instanceof 构造函数
+
+作用:检测右边构造函数的原型在不在左边对象的原型链中.
+
+```
+  var arr = [10,20,30];
+/* 
+1.数组的原型链 
+arr -> Array.prototype -> Object.prototype -> null
+*/
+console.log(arr instanceof Array);// true
+console.log(arr instanceof Object);// true
+2.Function函数对象的原型链
+根据instanceof运算规则 ： 左边Function 对象 右边Function是构造函数
+Function函数对象 -> Function.prototype -> Object.prototype ->null
+*/
+console.log(Function instanceof Function);// true
+console.log(Function instanceof Object);// true
+/* 
+3. Object构造函数的原型链
+根据instanceof运算规则 ： 左边Object函数对象 右边Object构造函数
+Object函数对象 ——》 Function.prototype-> Object.prototype -> null
+*/
+console.log(Object instanceof Object);// true
+console.log(Object instanceof Function);// true
+```
+
+## 8, 斐波纳契数列
 
