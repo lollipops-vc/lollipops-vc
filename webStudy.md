@@ -1,4 +1,4 @@
-# HTML
+# HTML/HTTP/浏览器
 
 ## 1，html5新特性
 
@@ -90,7 +90,7 @@ dialog
 
   html5拥有多个表单输入类型，这些新特性提供了更好的输入控制和验证
 
-* color :颜色
+* color :颜色   
 * date:日期
 * datetime
 * datetime-local:含有本地时间的日历
@@ -137,7 +137,9 @@ sessionStorage
 
   cookie:如果不在浏览器中设置过期时间,cookie被保存在内存中,生命周期随浏览器的关闭而结束,这种cookie简称会话cookie,如果设置了过期时间,cookie是被保存在硬盘中,关闭浏览器后,数据仍然存在,知道过期时间结束.cookie是服务器发送客户端的特殊信息,以文本的方式保存在客户端,每次请求都带上
 
-  session:当服务器收到请求需要创建session机制,首先会检查客户端请求中是否包含sessionid,如果有,服务器根据id返回session对象.如果没有,服务器会创建新的session对象.并把sessionis在本次相应中返回给客户端,通常使用cookie方式存储sessionid到客户端，在交互中浏览器按照规则将sessionid发送给服务器。如果用户禁用cookie，则要使用URL重写，可以通过response.encodeURL(url) 进行实现；API对encodeURL的结束为，当浏览器支持Cookie时，url不做任何处理；当浏览器不支持Cookie的时候，将会重写URL将SessionID拼接到访问地址后。
+  session:当服务器收到请求需要创建session机制,首先会检查客户端请求中是否包含sessionid,如果有,服务器根据id返回session对象.如果没有,服务器会创建新的session对象.并把sessionis在本次相应中返回给客户端,通常使用cookie方式存储sessionid到客户端，在交互中浏览器按照规则将sessionid发送给服务器。65如果用户禁用cookie，则要使用URL重写，可以通过response.encodeURL(url)4
+
+  75 进行实现；API对encodeURL的结束为，当浏览器支持Cookie时，url不做任何处理；当浏览器不支持Cookie的时候，将会重写URL将SessionID拼接到访问地址后。
 
 * 存储内容:cookie只能存储字符串,session通过类似与Hashtable的数据结构来保存，能支持任何类型的对象(session中可含有多个对象)
 
@@ -149,7 +151,7 @@ sessionStorage
 
   原因:
 
-    (1) sessionID 存储在cookie中,若要攻破session,先要攻破cookie
+    (1) sessionID 存储在cookie中,若要攻破session,先要攻破c///ookie
 
     (2) seesionID 需要人登录,或者启动seesion_start,所以攻破cookie也不一定得到sessionID
 
@@ -475,9 +477,208 @@ this.$http.jsonp('http://www.domain2.com:8080/login', {
 缺点:
 
 * 安全:同事web Storage,web Socket这样的功能很容易被黑客利用,来盗取用户的信息和资料
+
 * 完善性,许多特性各浏览器的支持成都也不一样
+
 * 性能:某些平台的引擎问题导致html5性能低下
+
 * 浏览器兼容问题:iE9以下浏览器几乎全军覆没
+
+## 7,在地址栏里输入一个URL,到这个页面呈现出来，中间会发生什么？
+
+DNS解析->TCP链接->发送HTTP请求->服务器请求并返回HTTP报文->浏览器解析渲染页面->链接结束
+
+输入url后，首先需要找到这个url域名的服务器ip,为了寻找这个ip，浏览器首先会寻找缓存，查看缓存中是否有记录，缓存的查找记录为：浏览器缓存-》系统缓存-》路由器缓存，缓存中没有则查找系统的hosts文件中是否有记录，如果没有则查询DNS服务器，得到服务器的ip地址后，浏览器根据这个ip以及相应的端口号，构造一个http请求，这个请求报文会包括这次请求的信息，主要是请求方法，请求说明和请求附带的数据，并将这个http请求封装在一个tcp包中，这个tcp包会依次经过传输层，网络层，数据链路层，物理层到达服务器，服务器解析这个请求来作出响应，返回相应的html给浏览器，因为html是一个树形结构，浏览器根据这个html来构建DOM树，在dom树的构建过程中如果遇到JS脚本和外部JS连接，则会停止构建DOM树来执行和下载相应的代码，这会造成阻塞，这就是为什么推荐JS代码应该放在html代码的后面，之后根据外部央视，内部央视，内联样式构建一个CSS对象模型树CSSOM树，构建完成后和DOM树合并为渲染树，这里主要做的是排除非视觉节点，比如script，meta标签和排除display为none的节点，之后进行布局，布局主要是确定各个元素的位置和尺寸，之后是渲染页面，因为html文件中会含有图片，视频，音频等资源，在解析DOM的过程中，遇到这些都会进行并行下载，浏览器对每个域的并行下载数量有一定的限制，一般是4-6个，当然在这些所有的请求中我们还需要关注的就是缓存，缓存一般通过Cache-Control、Last-Modify、Expires等首部字段控制。 Cache-Control和Expires的区别在于Cache-Control使用相对时间，Expires使用的是基于服务器 端的绝对时间，因为存在时差问题，一般采用Cache-Control，在请求这些有设置了缓存的数据时，会先 查看是否过期，如果没有过期则直接使用本地缓存，过期则请求并在服务器校验文件是否修改，如果上一次 响应设置了ETag值会在这次请求的时候作为If-None-Match的值交给服务器校验，如果一致，继续校验 Last-Modified，没有设置ETag则直接验证Last-Modified，再决定是否返回304
+
+## 8,前段性能优化
+
+* 减少http请求次数合并资源，减少HTTP 请求数，minify / gzip 压缩，webP，lazyLoad。
+
+* 加快请求速度：预解析DNS，减少域名数，并行加载，CDN 分发。
+
+* 缓存：HTTP 协议缓存请求，离线缓存 manifest，离线数据缓存localStorage。
+
+* 延迟加载 lazyLoad
+
+  ```
+  //引入
+  <script type="text/javascript" src="jquery.js"></script>
+  <script type="text/javascript" src="jquery.lazyload.js"></script>
+  <img class="lazy" alt="" width="640" height="480" data-original="img/example.jpg" />
+  
+  $(function() {
+      $("img.lazy").lazyload({[''
+      threshold : 200//设置 threshold 为 200 令图片在距离屏幕 200 像素时提前加载.
+      event : "click"//设置,点击时触发
+      effect : "fadeIn"//添加页面效果,淡入淡出
+  });
+  });
+  ```
+
+* 渲染：JS/CSS优化，加载顺序，服务端渲染，pipeline。
+
+   预加载:预加载相当于是快用户一步，在空闲的时候就把用户即将用到的资源加载完，等用户实际需要使用时，资源已经存在在本地，自然就跳过了整个加载的等待时间。(与懒加载做对比)
+
+   1. Prefetch:你可以把 Prefetch 理解为资源预获取。一般来说，可以用   Prefetch 来指定在紧接着之后的操作或浏览中需要使用到的资         源，让浏览器提前获取。由于仅仅是提前获取资源，因此浏览器不会对资源进行预处理，并且像 CSS 样式表、JavaScript 脚本这样的资源是不会自动执行并应用于当前文档的。其中 `as` 属性用于指定资源的类型，与 Preload 规范一致，[基本涵盖了所有资源类型](https://www.w3.org/TR/preload/#as-attribute)[2]。
+
+      ```
+      <link rel="prefetch" href="/prefetch.js" as="script">
+      ```
+
+      
+
+   2. Prerender:Prerender 比 Prefetch 更进一步，可以粗略地理解不仅会预获取，还会预执行。如果你指定 Prerender 一个页面，那么它依赖的其他资源，像 `<script>`、`<link>` 等页面所需资源也可能会被下载与处理。但是预处理会基于当前机器、网络情况的不同而被不同程度地推迟。例如，会根据 CPU、GPU 和内存的使用情况，以及请求操作的幂等性而选择不同的策略或阻止该操作。
+
+      ```
+      <link rel="prerender" href="//sample.com/nextpage.html">
+      ```
+
+   3. Preload：在遇到需要 Preload 的资源时，浏览器会 **立刻** 进行预获取，并将结果放在内存中，资源的获取不会影响页面 parse 与 load 事件的触发。直到再次遇到该资源的使用标签时，才会执行。由于我们会将 `<script>` 标签置于 `<body>` 底部来保证性能，因此可以考虑在 `<head>` 标签中适当添加这些资源的 Preload 来加速页面的加载与渲染。
+
+   ```
+   <link rel="preload" href="./nextpage.js" as="script">
+   ```
+
+      
+
+
+## 9, csrf和xss的网络攻击及防范
+
+CSRF：跨站请求伪造，可以理解为攻击者盗用了用户的身份，以用户的名义发送了恶意请求，比如用户登录了一个网站后，立刻在另一个ｔａｂ页面访问量攻击者用来制造攻击的网站，这个网站要求访问刚刚登陆的网站，并发送了一个恶意请求，这时候CSRF就产生了，比如这个制造攻击的网站使用一张图片，但是这种图片的链接却是可以修改数据库的，这时候攻击者就可以以用户的名义操作这个数据库，防御方式的话：使用验证码，检查https头部的refer，使用token
+
+csrf解决方案:防御CSRF 攻击主要有三种策略：验证 HTTP Referer 字段；在请求地址中添加 token 并验证；在 HTTP 头中自定义属性并验证。
+
+XSS：跨站脚本攻击，是说攻击者通过注入恶意的脚本，在用户浏览网页的时候进行攻击，比如获取cookie，或者其他用户身份信息，可以分为存储型和反射型，存储型是攻击者输入一些数据并且存储到了数据库中，其他浏览者看到的时候进行攻击，反射型的话不存储在数据库中，往往表现为将攻击代码放在url地址的请求参数中，防御的话为cookie设置httpOnly属性，对用户的输入进行检查，进行特殊字符过滤
+
+xss解决方案:
+
+1、将能被转换为html的输入内容，在写代码时改为innerText而不用innerHTML
+
+2、实在没有办法的情况下可用如下方法（js代码）
+
+```
+function safeStr(str){
+return str.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+```
+
+## 10,get和post的区别
+
+get参数通过url传递，post放在request body中。
+
+get请求在url中传递的参数是有长度限制的，而post没有。(实际上HTTP 协议从未规定 GET/POST 的请求长度限制是多少。对get请求参数的限制是来源与浏览器或web服务器，浏览器或web服务器限制了url的长度。)
+
+get比post更不安全，因为参数直接暴露在url中，所以不能用来传递敏感信息。
+
+get请求只能进行url编码，而post支持多种编码方式
+
+get请求类似于查找的过程，用户获取数据，可以不用每次都与数据库连接，所以可以使用缓存。post不同，post做的一般是修改和删除的工作，所以必须与数据库交互，所以不能使用缓存。因此get请求适合于请求缓存。
+
+get请求参数会被完整保留在浏览历史记录里，而post中的参数不会被保留。
+
+GET和POST本质上就是TCP链接，并无差别。但是由于HTTP的规定和浏览器/服务器的限制，导致他们在应用过程中体现出一些不同。
+
+GET产生一个TCP数据包；POST产生两个TCP数据包:对于GET方式的请求，浏览器会把http header和data一并发送出去，服务器响应200（返回数据）；而对于POST，浏览器先发送header，服务器响应100 continue，浏览器再发送data，服务器响应200 ok（返回数
+
+据）。
+
+## 11,缓存
+
+ajax解决缓存:
+
+在ajax发送请求前加上 anyAjaxObj.setRequestHeader("If-Modified-Since","0")。
+
+在ajax发送请求前加上 anyAjaxObj.setRequestHeader("Cache-Control","no-cache")。
+
+在URL后面加上一个随机数： "fresh=" + Math.random()。
+
+在URL后面加上时间搓："nowtime=" + new Date().getTime()。
+
+如果是使用jQuery，直接这样就可以了 $.ajaxSetup({cache:false})。这样页面的所有ajax都会执行这条语句就是不需要保存缓存记录。
+
+## 12,http版本
+
+## 1、HTTP 0.9
+
+
+
+HTTP 0.9是第一个版本的HTTP协议，已过时。它的组成极其简单，只允许客户端发送GET这一种请求，且不支持请求头。由于没有协议头，造成了HTTP 0.9协议只支持一种内容，即纯文本。不过网页仍然支持用HTML语言格式化，同时无法插入图片。
+
+
+
+HTTP 0.9具有典型的无状态性，每个事务独立进行处理，事务结束时就释放这个连接。由此可见，HTTP协议的无状态特点在其第一个版本0.9中已经成型。一次HTTP 0.9的传输首先要建立一个由客户端到Web服务器的TCP连接，由客户端发起一个请求，然后由Web服务器返回页面内容，然后连接会关闭。如果请求的页面不存在，也不会返回任何错误码。
+
+
+
+## 2、HTTP 1.0
+
+
+
+HTTP协议的第二个版本，第一个在通讯中指定版本号的HTTP协议版本，至今仍被广泛采用。相对于HTTP 0.9 增加了如下主要特性：
+
+- 请求与响应支持头域
+- 响应对象以一个响应状态行开始
+- 响应对象不只限于超文本
+- 开始支持客户端通过POST方法向Web服务器提交数据，支持GET、HEAD、POST方法
+- （短连接）每一个请求建立一个TCP连接，请求完成后立马断开连接。这将会导致2个问题：连接无法复用，head of line blocking。连接无法复用会导致每次请求都经历三次握手和慢启动。三次握手在高延迟的场景下影响较明显，慢启动则对文件类请求影响较大。head of line blocking会导致带宽无法被充分利用，以及后续健康请求被阻塞。
+
+
+
+## 3、HTTP 1.1
+
+
+
+HTTP协议的第三个版本是HTTP 1.1，是目前使用最广泛的协议版本 。HTTP 1.1是目前主流的HTTP协议版本，因此这里就多花一些笔墨介绍一下HTTP 1.1的特性。
+
+
+
+HTTP 1.1引入了许多关键性能优化：keepalive连接，chunked编码传输，字节范围请求，请求流水线等
+
+
+
+- Persistent Connection（keepalive连接）：允许HTTP设备在事务处理结束之后将TCP连接保持在打开的状态，以便未来的HTTP请求重用现在的连接，直到客户端或服务器端决定将其关闭为止。在HTTP1.0中使用长连接需要添加请求头 Connection: Keep-Alive，而在HTTP 1.1 所有的连接默认都是长连接，除非特殊声明不支持（ HTTP请求报文首部加上Connection: close ）。服务器端按照FIFO原则来处理不同的Request。
+
+
+
+![img](https://pic3.zhimg.com/80/v2-0b7ec9d73c1f90ccae4f566baf4f2c7a_720w.jpg)
+
+
+
+
+
+- chunked编码传输：该编码将实体分块传送并逐块标明长度，直到长度为0块表示传输结束，这在实体长度未知时特别有用(比如由数据库动态产生的数据)
+- 字节范围请求：HTTP1.1支持传送内容的一部分。比方说，当客户端已经有内容的一部分，为了节省带宽，可以只向服务器请求一部分。该功能通过在请求消息中引入了range头域来实现，它允许只请求资源的某个部分。在响应消息中Content-Range头域声明了返回的这部分对象的偏移值和长度。如果服务器相应地返回了对象所请求范围的内容，则响应码206（Partial Content）
+- Pipelining（请求流水线）
+
+
+
+另外，HTTP 1.1还新增了如下特性：
+
+- 请求消息和响应消息都支持Host头域：在HTTP1.0中认为每台服务器都绑定一个唯一的IP地址，因此，请求消息中的URL并没有传递主机名（hostname）。但随着虚拟主机技术的发展，在一台物理服务器上可以存在多个虚拟主机（Multi-homed Web Servers），并且它们共享一个IP地址。因此，Host头的引入就很有必要了。
+
+- 新增了一批Request method：HTTP1.1增加了OPTIONS,PUT, DELETE, TRACE, CONNECT方法
+
+- 缓存处理：HTTP/1.1在1.0的基础上加入了一些cache的新特性，引入了实体标签，一般被称为e-tags，新增更为强大的Cache-Control头。
+
+4、HTTP 2.0
+
+  
+
+  HTTP 2.0是下一代HTTP协议，目前应用还非常少。主要特点有：
+
+  - 多路复用（二进制分帧）。HTTP 2.0最大的特点：不会改动HTTP 的语义，HTTP 方法、状态码、URI 及首部字段，等等这些核心概念上一如往常，却能致力于突破上一代标准的性能限制，改进传输性能，实现低延迟和高吞吐量。而之所以叫2.0，是在于新增的二进制分帧层。在二进制分帧层上， HTTP 2.0 会将所有传输的信息分割为更小的消息和帧，并对它们采用二进制格式的编码 ，其中HTTP1.x的首部信息会被封装到Headers帧，而我们的request body则封装到Data帧里面。
+
+  
+
+  ![img](https://pic4.zhimg.com/80/v2-d75bfb854399171eab9a056f93dd4953_720w.jpg)
+
+  
+
+  - HTTP 2.0 通信都在一个连接上完成，这个连接可以承载任意数量的双向数据流。相应地，每个数据流以消息的形式发送，而消息由一或多个帧组成，这些帧可以乱序发送，然后再根据每个帧首部的流标识符重新组装。
+  - 头部压缩：当一个客户端向相同服务器请求许多资源时，像来自同一个网页的图像，将会有大量的请求看上去几乎同样的，这就需要压缩技术对付这种几乎相同的信息。
+  - 随时复位：HTTP1.1一个缺点是当HTTP信息有一定长度大小数据传输时，你不能方便地随时停止它，中断TCP连接的代价是昂贵的。使用HTTP2的RST_STREAM将能方便停止一个信息传输，启动新的信息，在不中断连接的情况下提高带宽利用效率。
+  - 服务器端推流：Server Push。客户端请求一个资源X，服务器端判断也许客户端还需要资源Z，在无需事先询问客户端情况下将资源Z推送到客户端，客户端接受到后，可以缓存起来以备后用。
+  - 优先权和依赖：每个流都有自己的优先级别，会表明哪个流是最重要的，客户端会指定哪个流是最重要的，有一些依赖参数，这样一个流可以依赖另外一个流。优先级别可以在运行时动态改变，当用户滚动页面时，可以告诉浏览器哪个图像是最重要的，你也可以在一组流中进行优先筛选，能够突然抓住重点流。
 
 # css
 
@@ -783,6 +984,41 @@ Link属于html标签，而@import是CSS中提供的
 @import只有在ie5以上才可以被识别，而link是html标签，不存在浏览器兼容性问题
 
 Link引入样式的权重大于@import的引用（@import是将引用的样式导入到当前的页面中）
+
+## 6,清除浮动:
+
+方法一：使用带clear属性的空元素
+
+在浮动元素后使用一个空元素如<div class="clear"></div>，并在CSS中赋予.clear{clear:both;}属性即可清理浮动。亦可使用<br class="clear" />或<hr class="clear" />来进行清理。
+
+方法二：使用CSS的overflow属性
+
+给浮动元素的容器添加overflow:hidden;或overflow:auto;可以清除浮动，另外在 IE6 中还需要触发 hasLayout ，例如为父元素设置容器宽高或设置 zoom:1。
+
+在添加overflow属性后，浮动元素又回到了容器层，把容器高度撑起，达到了清理浮动的效果。
+
+方法三：给浮动的元素的容器添加浮动
+
+给浮动元素的容器也添加上浮动属性即可清除内部浮动，但是这样会使其整体浮动，影响布局，不推荐使用。
+
+方法四：使用邻接元素处理
+
+什么都不做，给浮动元素后面的元素添加clear属性。
+
+方法五：使用CSS的:after伪元素
+
+结合:after 伪元素（注意这不是伪类，而是伪元素，代表一个元素之后最近的元素）和 IEhack ，可以完美兼容当前主流的各大浏览器，这里的 IEhack 指的是触发 hasLayout。
+
+给浮动元素的容器添加一个clearfix的class，然后给这个class添加一个:after伪元素实现元素末尾添加一个看不见的块元素（Block element）清理浮动。
+
+## 7,为什么CSS放头部，JS放底部
+
+CSS放头部，JS放底部，这样可以提高页面的性能。然而，为什么呢？原因如下：
+
+CSS 不会阻塞 DOM 的解析，但会阻塞 DOM 渲染。
+JS 阻塞 DOM 解析，但浏览器会"偷看"DOM，预先下载相关资源。
+浏览器遇到 <script>且没有defer或async属性的 标签时，会触发页面渲染，因而如果前面CSS资源尚未加载完毕时，浏览器会等待它加载完毕在执行脚本。
+这就是为何<script>最好放底部，<link>最好放头部，如果头部同时有<script>与<link>的情况下，最好将<script>放在<link>上面了吗？
 
 # JavaScript
 
@@ -1701,3 +1937,996 @@ console.log(Object instanceof Function);// true
 
 ## 8, 斐波纳契数列
 
+## 9,闭包
+
+闭包就是能够读取其他函数内部变量的函数，或者子函数在外调用，子函数所在的父函数的作用域不会被释放。jquery就是$的闭包
+
+## 10,继承
+
+```
+下面来创建一个Animal类：
+// 定义一个动物类
+function Animal (name) {
+// 属性
+this.name = name || 'Animal';
+// 实例方法
+this.sleep = function(){
+console.log(this.name + '正在睡觉！');
+}
+}
+// 原型方法
+Animal.prototype.eat = function(food) {
+console.log(this.name + '正在吃：' + food);
+};
+```
+
+* 原型链继承：	
+
+```
+function Cat(){ }
+Cat.prototype = new Animal();
+Cat.prototype.name = 'cat';
+//　Test Code
+var cat = new Cat();
+console.log(cat.name);
+console.log(cat.eat('fish'));
+console.log(cat.sleep());
+console.log(cat instanceof Animal); //true
+console.log(cat instanceof Cat); //true
+```
+
+在这里我们可以看到new了一个空对象,这个空对象指向Animal并且Cat.prototype指向了这个空对象，这种就是基于原型链的继承。
+
+特点：基于原型链，既是父类的实例，也是子类的实例
+
+缺点：无法实现多继承
+
+* 构造继承：使用父类的构造函数来增强子类实例，等于是复制父类的实例属性给子类（没用到原型）
+
+```
+function Cat(name){
+Animal.call(this);
+this.name = name || 'Tom';
+}
+// Test Code
+var cat = new Cat();
+console.log(cat.name);
+console.log(cat.sleep());
+console.log(cat instanceof Animal); // false
+console.log(cat instanceof Cat); // true
+```
+
+* 实例继承和拷贝继承
+
+实例继承：为父类实例添加新特性，作为子类实例返回
+
+拷贝继承：拷贝父类元素上的属性和方法
+
+上述两个实用性不强，不一一举例。
+
+* 组合继承：相当于构造继承和原型链继承的组合体。通过调用父类构造，继承父类的属性并保留传参的优点，然后通过将父类实例作为子类原型，实现函数复用
+
+```
+function Cat(name){
+Animal.call(this);
+this.name = name || 'Tom';
+}
+Cat.prototype = new Animal();
+Cat.prototype.constructor = Cat;
+// Test Code
+var cat = new Cat();
+console.log(cat.name);
+console.log(cat.sleep());
+console.log(cat instanceof Animal); // true
+console.log(cat instanceof Cat); // true
+```
+
+特点：可以继承实例属性/方法，也可以继承原型属性/方法
+
+缺点：调用了两次父类构造函数，生成了两份实例
+
+* 寄生组合继承：通过寄生方式，砍掉父类的实例属性，这样，在调用两次父类的构造的时候，就不会初始化两次实例方法/属性
+
+```
+//创建一个没有实例方法的类
+var Super = function(){};
+Super.prototype = Animal.prototype;
+```
+
+将实例作为子类的原型
+
+```
+Cat.prototype = new Super();
+})();
+// Test Code
+var cat = new Cat();
+console.log(cat.name);
+console.log(cat.sleep());
+console.log(cat instanceof Animal); // true
+console.log(cat instanceof Cat); //true
+```
+
+## 11,异步回调地狱
+
+在使用JavaScript时，为了实现某些逻辑经常会写出层层嵌套的回调函数，如果嵌套过多，会极大影响代码可读性和逻辑，这种情况也被成为回调地狱
+
+解决方案:Promise 对象、Generator 函数、async 函数
+
+1,:Promise 对象:Promise 是一个对象，从其中可以获取异步操作的消息，可以说它更像是一个容器，保存着将来才会结束的事件（也就是一个异步操作）。
+
+Promise 对象代理的值其实是未知的，状态是动态可变的，因此 Promise 对象的状态有三种：进行中、结束、失败，它运行的时候，只能从进行中到失败，或者是从进行中到成功。使用 Promise 对象只要是通过同步的表达形式来运行异步代码。
+
+1. pending：初始状态，既不成功，也不失败；
+2. fulfilled：操作成功结束；
+3. rejected：操作失败。
+
+```
+function f1() {
+   return new Promise((resolve, reject) => {
+      setTimeout(() => resolve(11), 1000);
+   }).then(data => console.log(data));
+}
+function f2() {
+   return new Promise((resolve, reject) => {
+      setTimeout(() => resolve(22), 2000);
+   }).then(data => console.log(data));;
+}
+function f3() {
+   return new Promise((resolve, reject) => {
+      setTimeout(() => resolve(33), 3000);
+   }).then(data => console.log(data));;
+}
+f1().then(f2).then(f3)
+```
+
+* #### Async/Await
+
+  **async** 必须声明的是一个 **function** 函数，**await** 就必须是在 **async** 声明的函数内部使用，这是一个固定搭配，
+
+```
+let data = 'data'
+a = async function () {
+  const b = function () {
+     await data
+  }
+}
+```
+
+调用 promise1，使用 promise1 返回的结果再去调用 promise2，然后使用两者的结果去调用 promise3。在没有使用 Async/Await 之前的写法，应该是这样的：
+
+```
+const request = () => {
+  return promise1()
+    .then(value1 => {
+      return promise2(value1)
+        .then(value2 => {        
+          return promise3(value1, value2)
+        })
+    })
+}
+```
+
+使用了 Async/Await 的写法之后，是这样的：
+
+```
+const request = async () => {
+  const value1 = await promise1()
+  const value2 = await promise2(value1)
+  return promise3(value1, value2)
+}
+```
+
+* ## Generator 函数
+
+  ```
+  // 用 co 模块自动执行
+  var co = require('co');
+  var sayhello = function (name, ms) {
+    setTimeout(function (name,ms) {
+      console.log(name);
+    }, ms);
+  }
+  var gen = function* () {
+    yield sayhello("xiaomi", 2000);
+    console.log('frist');
+    yield sayhello("huawei", 1000);
+    console.log('second');
+    yield sayhello("apple", 500);
+    console.log('end');
+  }
+  co(gen());
+  ```
+
+  ## 12,JS的防抖和节流
+
+  scroll 事件本身会触发页面的重新渲染，同时 scroll 事件的 handler 又会被高频度的触发, 因此事件的 handler 内部不应该有复杂操作，例如 DOM 操作就不应该放在事件处理中。
+
+  针对此类高频度触发事件问题（例如页面 scroll ，屏幕 resize，监听用户输入等），下面介绍两种常用的解决方法，防抖和节流。
+
+* 防抖:
+
+  防抖技术即是可以把多个顺序地调用合并成一次，也就是在一定时间内，规定事件被触发的次数。
+
+  ```
+  // 简单的防抖动函数
+  function debounce(func, wait, immediate) {
+      // 定时器变量
+      var timeout;
+      return function() {
+          // 每次触发 scroll handler 时先清除定时器
+          clearTimeout(timeout);
+          // 指定 xx ms 后触发真正想进行的操作 handler
+          timeout = setTimeout(func, wait);
+      };
+  };
+   
+  // 实际想绑定在 scroll 事件上的 handler
+  function realFunc(){
+      console.log("Success");
+  }
+   
+  // 采用了防抖动
+  window.addEventListener('scroll',debounce(realFunc,500));
+  // 没采用防抖动
+  window.addEventListener('scroll',realFunc);
+  ```
+
+* 节流:
+
+  防抖函数确实不错，但是也存在问题，譬如图片的懒加载，我希望在下滑过程中图片不断的被加载出来，而不是只有当我停止下滑时候，图片才被加载出来。又或者下滑时候的数据的 ajax 请求加载也是同理。
+
+  这个时候，我们希望即使页面在不断被滚动，但是滚动 handler 也可以以一定的频率被触发（譬如 250ms 触发一次），这类场景，就要用到另一种技巧，称为节流函数（throttling）。
+
+## 12,浅拷贝和深拷贝
+
+- 浅拷贝是创建一个新对象，这个对象有着原始对象属性值的一份精确拷贝。如果属性是基本类型，拷贝的就是基本类型的值，如果属性是引用类型，拷贝的就是内存地址 ，所以**如果其中一个对象改变了这个地址，就会影响到另一个对象**。
+
+- 深拷贝是将一个对象从内存中完整的拷贝一份出来,从堆内存中开辟一个新的区域存放新对象,且**修改新对象不会影响原对象**。
+
+ 赋值和深/浅拷贝的区别:都是**针对引用类型**：
+
+当我们把一个对象赋值给一个新的变量时，**赋的其实是该对象的在栈中的地址，而不是堆中的数据**。也就是两个对象指向的是同一个存储空间，无论哪个对象发生改变，其实都是改变的存储空间的内容，因此，两个对象是联动的。
+
+浅拷贝：重新在堆中创建内存，拷贝前后对象的基本数据类型互不影响，但拷贝前后对象的引用类型因共享同一块内存，会相互影响。
+
+深拷贝：从堆内存中开辟一个新的区域存放新对象，对对象中的子对象进行递归拷贝,拷贝前后的两个对象互不影响。
+
+浅拷贝的实现方式:
+
+1,.Object.assign()
+
+```
+let obj1 = { person: {name: "kobe", age: 41},sports:'basketball' };
+let obj2 = Object.assign({}, obj1);
+obj2.person.name = "wade";
+obj2.sports = 'football'
+console.log(obj1); // { person: { name: 'wade', age: 41 }, sports: 'basketball' }
+```
+
+2,函数库lodash的_.clone方法
+
+```
+var _ = require('lodash');
+var obj1 = {
+    a: 1,
+    b: { f: { g: 1 } },
+    c: [1, 2, 3]
+};
+var obj2 = _.clone(obj1);
+console.log(obj1.b.f === obj2.b.f);// true
+```
+
+3,...展开运算符
+
+```
+let obj1 = { name: 'Kobe', address:{x:100,y:100}}
+let obj2= {... obj1}
+obj1.address.x = 200;
+obj1.name = 'wade'
+console.log('obj2',obj2) // obj2 { name: 'Kobe', address: { x: 200, y: 100 } }
+```
+
+深拷贝:
+
+1.JSON.parse(JSON.stringify())
+
+```
+let arr = [1, 3, {
+    username: ' kobe'
+}];
+let arr4 = JSON.parse(JSON.stringify(arr));
+arr4[2].username = 'duncan'; 
+console.log(arr, arr4)
+```
+
+2.函数库lodash的_.cloneDeep方法
+
+```
+var _ = require('lodash');
+var obj1 = {
+    a: 1,
+    b: { f: { g: 1 } },
+    c: [1, 2, 3]
+};
+var obj2 = _.cloneDeep(obj1);
+console.log(obj1.b.f === obj2.b.f);// false
+```
+
+3.jQuery.extend()方法
+
+```
+$.extend(deepCopy, target, object1, [objectN])//第一个参数为true,就是深拷贝
+```
+
+4,递归
+
+```
+function deepClone(obj){
+var newObj= obj instanceof Array ? []:{};
+for(var item in obj){
+var temple= typeof obj[item] == 'object' ? deepClone(obj[item]):obj[item];
+newObj[item] = temple;
+}
+return newObj;
+}
+```
+
+## 13,es6新特性
+
+## 14,webPack
+
+webpack 是一个现代 JavaScript 应用程序的静态模块打包器(module bundler)。当 webpack 处理应用程序时，它会递归地构建一个依赖关系图(dependency graph)，其中包含应用程序需要的每个模块，然后将所有这些模块打包成一个或多个bundle。
+
+# angular JS框架
+
+## 1,AngularJS双向绑定原理
+
+采用了脏检查机制。
+
+双向数据绑定是 AngularJS 的核心机制之一。当 view 中有任何一个数据变化时，都会更新到 model 中。如果 model 中的数据有变化时，view 也会同步更新，显然，这需要一个监控。
+
+原理
+
+Angular 在 scope 模型上设置了一个监听队列，这个监听队列可以用来监听数据变化并更新 view 。每次绑定一个东西到 view 上时， AngularJS 就会往 $watch 队列里插入一条 $watch ，用来检测它监视的 model 里是否有变化的东西。当浏览器接收到可以被 angular context 处理的事件时， $digest 循环就会触发，遍历所有的 $watch ，最后更新 dom。
+
+
+
+## 2,生命周期
+
+**ngOnChanges** 
+ 设置或重新设置数据绑定的输入属性时响应。 该方法接受当前和上一属性值的 SimpleChanges 对象 注意，这发生的非常频繁，所以你在这里执行的任何操作都会显著影响性能
+
+**ngOnInit** 
+ 第一次显示数据绑定和设置指令/组件的输入属性之后，初始化指令/组件
+
+**ngDoCheck** 
+ 检测，并在发生 Angular 无法或不愿意自己检测的变化时作出反应
+
+**ngAfterContentInit** 
+ 外部内容投影进组件视图或指令所在的视图之后调用
+
+**ngAfterContentChecked** 
+ 检查完被投影到组件或指令中的内容之后调用
+
+**ngAfterViewInit** 
+ 初始化完组件视图及其子视图或包含该指令的视图之后调用
+
+**ngAfterViewChecked** 
+ 做完组件视图和子视图或包含该指令的视图的变更检测之后调用
+
+**ngOnDestroy** 
+ 每当 Angular 每次销毁指令/组件之前调用并清扫。 在这儿反订阅可观察对象和分离事件处理器，以防内存泄漏
+
+## 3, 两个平级界面块 a 和 b，如果 a 中触发一个事件，有哪些方式能让 b 知道？详述原理
+
+共用服务
+
+在 Angular 中，通过 factory 可以生成一个单例对象，在需要通信的模块 a 和 b 中注入这个对象即可。
+
+基于事件
+
+这个又分两种方式
+
+第一种是借助父 controller。在子 controller 中向父 controller 触发（`$emit`）一个事件，然后在父 controller 中监听（`$on`）事件，再广播（`$broadcast`）给子 controller ，这样通过事件携带的参数，实现了数据经过父 controller，在同级 controller 之间传播。
+
+第二种是借助 `$rootScope`。每个 Angular 应用默认有一个根作用域 `$rootScope`， 根作用域位于最顶层，从它往下挂着各级作用域。所以，如果子控制器直接使用 `$rootScope` 广播和接收事件，那么就可实现同级之间的通信
+
+## 4,angular 的缺点
+
+##### 强约束
+
+导致学习成本较高，对前端不友好。
+
+但遵守 AngularJS 的约定时，生产力会很高，对 Java 程序员友好。
+
+##### 不利于 SEO
+
+因为所有内容都是动态获取并渲染生成的，搜索引擎没法爬取。
+
+一种解决办法是，对于正常用户的访问，服务器响应 AngularJS 应用的内容；对于搜索引擎的访问，则响应专门针对 SEO 的HTML页面。
+
+##### 性能问题
+
+作为 MVVM 框架，因为实现了数据的双向绑定，对于大数组、复杂对象会存在性能问题。
+
+可以用来 [优化 Angular 应用的性能](https://github.com/xufei/blog/issues/23) 的办法：
+
+1. 减少监控项（比如对不会变化的数据采用单向绑定）
+2. 主动设置索引（指定 `track by`，简单类型默认用自身当索引，对象默认使用 `$$hashKey`，比如改为 `track by item.id`）
+3. 降低渲染数据量（比如分页，或者每次取一小部分数据，根据需要再取）
+4. 数据扁平化（比如对于树状结构，使用扁平化结构，构建一个 map 和树状数据，对树操作时，由于跟扁平数据同一引用，树状数据变更会同步到原始的扁平数据）
+
+另外，对于Angular1.x ，存在 脏检查 和 模块机制 的问题。
+
+## 5,详述 angular 的 “依赖注入”
+
+依赖注入是一种软件设计模式，目的是处理代码之间的依赖关系，减少组件间的耦合。
+
+在 Angular App 运行的时候，调用 myCtrl，自动做了 `$scope` 和 `$http` 两个依赖性的注入
+
+原理:AngularJS 是通过构造函数的参数名字来推断依赖服务名称的，通过 `toString()` 来找到这个定义的 function 对应的字符串，然后用正则解析出其中的参数（依赖项），再去依赖映射中取到对应的依赖，实例化之后传入。
+
+## 6,.解释下什么是`$rootScrope`以及和`$scope`的区别？
+
+通俗的说`$rootScrope` 页面所有`$scope`的`父亲`。
+
+step1:Angular解析ng-app然后在内存中创建$rootScope。
+
+step2:angular回继续解析，找到{{}}表达式，并解析成变量。
+
+step3:接着会解析带有ng-controller的div然后指向到某个controller函数。这个时候在这个controller函数变成一个$scope对象实例。
+
+## 7, Angular中的digest周期是什么？
+
+每个digest周期中，angular总会对比scope上model的值，一般digest周期都是自动触发的
+
+## 8, 如何取消 `$timeout`, 以及停止一个`$watch()`?
+
+停止 $timeout我们可以用cancel：
+
+```
+var customTimeout = $timeout(function () {  
+  // your code
+}, 1000);
+ 
+$timeout.cancel(customTimeout);
+```
+
+停掉一个`$watch`：
+
+```
+
+// .$watch() 会返回一个停止注册的函数
+function that we store to a variable  
+var deregisterWatchFn = $rootScope.$watch(‘someGloballyAvailableProperty’, function (newVal) {  
+  if (newVal) {
+    // we invoke that deregistration function, to disable the watch
+    deregisterWatchFn();
+    ...
+  }
+});
+```
+
+## 9,ng-if跟ng-show/hide的区别有哪些？
+
+1、ng-if 在后面表达式为 true 的时候才创建dom 节点，而ng-show 是在初始时就创建了，可以用 display:block 和 display:none 来控制显示和不显示。
+
+2、ng-if 会（隐式地）产生新作用域，ng-switch 、ng-include 等会动态创建一块界面的也是如此。
+
+这样会导致，在 ng-if 中用基本变量绑定 ng-model，同事在外层的 div 中将 model 绑定给另一个显示区域后，在内层改变时，外层并不会随着内层改变，因为这已经两个不同的变量了。
+
+而在 ng-show 中，却不存在此问题，因为它不自带一级作用域。
+
+为了避免这类问题的出现，我们可以始终将页面中的元素绑定到对象的属性（data.x），而不是直接绑定到基本变量（x）上。
+
+## 10,ng-click 中写的表达式，能使用 JS 原生对象上的方法吗？
+
+不止是 ng-click 中，只要是在页面中，都是无法直接调用原生的 JS 方法的，因为这些并不存在于与页面对应的 Controller 的 $scope 中。
+
+但是可以通过filter
+
+```
+<p>{{13.14 | parseIntFilter}}</p>
+
+app.filter('parseIntFilter', function(){
+    return function(item){
+        return parseInt(item);
+    }
+})
+```
+
+有一席内置的api可以直接用
+
+ng 内置的filter主要有九种：
+
+1：date（日期）
+
+2：currency（货币）
+
+3：limitTo（限制数组或字符串长度）
+
+4：orderBy（排序）
+
+5：lowercase（小写）
+
+6：uppercase（大写）
+
+7：number（格式化数字，加上千位分隔符，并接收参数限定小数点位数）
+
+8：filter（处理一个数组，过滤出含有某个子串的元素）
+
+9：json（格式化 json 对象）
+
+## 11,factory、service 和 provider 是什么关系？
+
+factory
+
+把 service 的方法和数据放在一个对象里，并返回这个对象。
+
+```
+app.factory('FooService', function(){
+  return {
+    target: 'factory',
+    sayHello: function(){
+      return 'hello ' + this.target;
+    }
+  }
+});
+```
+
+service
+
+通过构造函数的方式创建 service，然后返回一个实例化对象。
+
+```
+app.service('FooService', function(){
+  var self = this;
+  this.target = 'service';
+  this.sayHello = function(){
+    return 'hello ' + self.target;
+  }
+});
+```
+
+provider
+
+创建一个可通过 config 配置的 service，$get 中返回的，就是用 factory 创建 service 的内容。
+
+```
+app.provider('FooService', function(){
+  this.configData = 'init data';
+  this.setConfigData = function(data){
+    if(data){
+      this.configData = data;
+    }
+  }
+  this.$get = function(){
+    var self = this;
+    return {
+      target: 'provider',
+      sayHello: function(){
+        return self.configData + ' hello ' + this.target;
+      }
+    }
+  }
+});
+ 
+// 此处注入的是 FooService 的 provider
+app.config(function(FooServiceProvider){
+  FooServiceProvider.setConfigData('config data');
+});
+```
+
+从底层实现上来看，三者的关系是：service 调用了 factory，返回其实例；factory 调用了 provider，返回其 $get 中定义的内容。factory 和 service 的功能类似，但是 factory 是普通 function，可以返回任何东西；service 是构造器，可以不返回（绑定到 this 的都可以被访问）；provider 是加强版 factory，返回一个可配置的 factory。
+
+# Vue 框架
+
+## 1,vue的生命周期
+
+Vue实例有一个完整的生命周期，也就是从开始创建、初始化数据、编译模板、挂载Dom、渲染→更新→渲染、销毁等一系列过程，我们称这是Vue的生命周期。通俗说就是Vue实例从创建到销毁的过程，就是生命周期。
+
+每一个组件或者实例都会经历一个完整的生命周期，总共分为三个阶段：初始化、运行中、销毁。
+
+实例、组件通过new Vue() 创建出来之后会初始化事件和生命周期，然后就会执行beforeCreate钩子函数，这个时候，数据还没有挂载呢，只是一个空壳，无法访问到数据和真实的dom，一般不做操作
+
+挂载数据，绑定事件等等，然后执行created函数，这个时候已经可以使用到数据，也可以更改数据,在这里更改数据不会触发updated函数，在这里可以在渲染前倒数第二次更改数据的机会，不会触发其他的钩子函数，一般可以在这里做初始数据的获取
+
+接下来开始找实例或者组件对应的模板，编译模板为虚拟dom放入到render函数中准备渲染，然后执行beforeMount钩子函数，在这个函数中虚拟dom已经创建完成，马上就要渲染,在这里也可以更改数据，不会触发updated，在这里可以在渲染前最后一次更改数据的机会，不会触发其他的钩子函数，一般可以在这里做初始数据的获取
+
+接下来开始render，渲染出真实dom，然后执行mounted钩子函数，此时，组件已经出现在页面中，数据、真实dom都已经处理好了,事件都已经挂载好了，可以在这里操作真实dom等事情...
+
+当组件或实例的数据更改之后，会立即执行beforeUpdate，然后vue的虚拟dom机制会重新构建虚拟dom与上一次的虚拟dom树利用diff算法进行对比之后重新渲染，一般不做什么事儿
+
+当更新完成后，执行updated，数据已经更改完成，dom也重新render完成，可以操作更新后的虚拟dom
+
+当经过某种途径调用$destroy方法后，立即执行beforeDestroy，一般在这里做一些善后工作，例如清除计时器、清除非指令绑定的事件等等
+
+组件的数据绑定、监听...去掉后只剩下dom空壳，这个时候，执行destroyed，在这里做善后工作也可以
+
+![](D:\workSpace\noteBook\images\vue01.png)
+
+## 2,Vue数据双向绑定原理
+
+Vue实现数据双向绑定主要利用的就是: **数据劫持**和**发布订阅模式**。
+所谓发布订阅模式就是，定义了对象间的一种**一对多的关系**，**让多个观察者对象同时监听某一个主题对象，当一个对象发生改变时，所有依赖于它的对象都将得到通知**。
+所谓数据劫持，就是**利用JavaScript的访问器属性**，即**Object.defineProperty()方法**，当对对象的属性进行赋值时，Object.defineProperty就可以**通过set方法劫持到数据的变化**，然后**通知发布者(主题对象)去通知所有观察者**，观察者收到通知后，就会对视图进行更新。
+
+1. 实现一个监听器 Observer，用来劫持并监听所有属性，如果发生变动，则通知订阅者。
+2. 实现一个订阅者 Watcher，当接到属性变化的通知时，执行对应的函数，然后更新视图，使用 Dep 来收集这些 Watcher。
+3. 实现一个解析器 Compile，用于扫描和解析的节点的相关指令，并根据初始化模板以及初始化相应的订阅器。
+
+## 3,说说你对 SPA 单页面的理解，它的优缺点分别是什么
+
+SPA（ single-page application ）仅在 Web 页面初始化时加载相应的 HTML、JavaScript 和 CSS。一旦页面加载完成，SPA 不会因为用户的操作而进行页面的重新加载或跳转；取而代之的是利用路由机制实现 HTML 内容的变换，UI 与用户的交互，避免页面的重新加载。
+
+**优点：**
+
+- 用户体验好、快，内容的改变不需要重新加载整个页面，避免了不必要的跳转和重复渲染；
+- 基于上面一点，SPA 相对对服务器压力小；
+- 前后端职责分离，架构清晰，前端进行交互逻辑，后端负责数据处理；
+
+**缺点：**
+
+- 初次加载耗时多：为实现单页 Web 应用功能及显示效果，需要在加载页面的时候将 JavaScript、CSS 统一加载，部分页面按需加载；
+- 前进后退路由管理：由于单页应用在一个页面中显示所有的内容，所以不能使用浏览器的前进后退功能，所有的页面切换需要自己建立堆栈管理；
+- SEO 难度较大：由于所有的内容都在一个页面中动态替换显示，所以在 SEO 上其有着天然的弱势。
+
+## 4,Vue 的单向数据流
+
+所有的 prop 都使得其父子 prop 之间形成了一个**单向下行绑定**：父级 prop 的更新会向下流动到子组件中，但是反过来则不行。这样会防止从子组件意外改变父级组件的状态，从而导致你的应用的数据流向难以理解。
+
+额外的，每次父级组件发生更新时，子组件中所有的 prop 都将会刷新为最新的值。这意味着你不应该在一个子组件内部改变 prop。如果你这样做了，Vue 会在浏览器的控制台中发出警告。子组件想修改时，只能通过 $emit 派发一个自定义事件，父组件接收到后，由父组件修改。
+
+## 5,computed 和 watch 的区别和运用的场景
+
+**computed：** 是计算属性，依赖其它属性值，并且 computed 的值有缓存，只有它依赖的属性值发生改变，下一次获取 computed 的值时才会重新计算 computed  的值；
+
+**watch：** 更多的是「观察」的作用，类似于某些数据的监听回调 ，每当监听的数据变化时都会执行回调进行后续操作；
+
+**运用场景：**
+
+- 当我们需要进行数值计算，并且依赖于其它数据时，应该使用 computed，因为可以利用 computed 的缓存特性，避免每次获取值时，都要重新计算；
+- 当我们需要在数据变化时执行异步或开销较大的操作时，应该使用 watch，使用 watch 选项允许我们执行异步操作 ( 访问一个 API )，限制我们执行该操作的频率，并在我们得到最终结果前，设置中间状态。这些都是计算属性无法做到的。
+
+## 6,Vue 的父组件和子组件生命周期钩子函数执行顺序？
+
+加载渲染过程
+
+父 beforeCreate -> 父 created -> 父 beforeMount -> 子 beforeCreate -> 子 created -> 子 beforeMount -> 子 mounted -> 父 mounted
+
+子组件更新过程
+
+父 beforeUpdate -> 子 beforeUpdate -> 子 updated -> 父 updated
+
+父组件更新过程
+
+父 beforeUpdate -> 父 updated
+
+销毁过程
+
+父 beforeDestroy -> 子 beforeDestroy -> 子 destroyed -> 父 destroyed
+
+## 9,哪个生命周期内调用异步请求？
+
+可以在钩子函数 created、beforeMount、mounted 中进行调用，因为在这三个钩子函数中，data 已经创建，可以将服务端端返回的数据进行赋值。但是本人推荐在 created 钩子函数中调用异步请求，因为在 created 钩子函数中调用异步请求有以下优点：
+
+- 能更快获取到服务端数据，减少页面 loading 时间；
+- ssr 不支持 beforeMount 、mounted 钩子函数，所以放在 created 中有助于一致性；
+
+##  10,在什么阶段才能访问操作DOM
+
+在钩子函数 mounted 被调用前，Vue 已经将编译好的模板挂载到页面上，所以在 mounted 中可以访问操作 DOM
+
+## 11,父组件可以监听到子组件的生命周期吗
+
+比如有父组件 Parent 和子组件 Child，如果父组件监听到子组件挂载 mounted 就做一些逻辑处理，可以通过以下写法实现：
+
+```
+// Parent.vue
+<Child @mounted="doSomething"/>
+    
+// Child.vue
+mounted() {
+  this.$emit("mounted");
+}
+```
+
+以上需要手动通过 $emit 触发父组件的事件，更简单的方式可以在父组件引用子组件时通过 @hook 来监听即可，如下所示：
+
+```
+//  Parent.vue
+<Child @hook:mounted="doSomething" ></Child>
+
+doSomething() {
+   console.log('父组件监听到 mounted 钩子函数 ...');
+},
+    
+//  Child.vue
+mounted(){
+   console.log('子组件触发 mounted 钩子函数 ...');
+},    
+    
+// 以上输出顺序为：
+// 子组件触发 mounted 钩子函数 ...
+// 父组件监听到 mounted 钩子函数 ...  
+```
+
+当然 @hook 方法不仅仅是可以监听 mounted，其它的生命周期事件，例如：created，updated 等都可以监听。
+
+## 12,谈谈你对 keep-alive 的了解？
+
+keep-alive 是 Vue 内置的一个组件，可以使被包含的组件保留状态，避免重新渲染 ，其有以下特性：
+
+- 一般结合路由和动态组件一起使用，用于缓存组件；
+- 提供 include 和 exclude 属性，两者都支持字符串或正则表达式， include 表示只有名称匹配的组件会被缓存，exclude 表示任何名称匹配的组件都不会被缓存 ，其中 exclude 的优先级比 include 高；
+- 对应两个钩子函数 activated 和 deactivated ，当组件被激活时，触发钩子函数 activated，当组件被移除时，触发钩子函数 deactivated。
+
+## 13,组件中 data 为什么是一个函数？
+
+```
+// data
+data() {
+  return {
+	message: "子组件",
+	childName:this.name
+  }
+}
+
+// new Vue
+new Vue({
+  el: '#app',
+  router,
+  template: '<App/>',
+  components: {App}
+})
+```
+
+因为组件是用来复用的，且 JS 里对象是引用关系，如果组件中 data 是一个对象，那么这样作用域没有隔离，子组件中的 data 属性值会相互影响，如果组件中 data 选项是一个函数，那么每个实例可以维护一份被返回对象的独立的拷贝，组件实例之间的 data 属性值不会互相影响；而 new Vue 的实例，是不会被复用的，因此不存在引用对象的问题。
+
+## 14,v-model 的原理
+
+我们在 vue 项目中主要使用 v-model 指令在表单 input、textarea、select 等元素上创建双向数据绑定，我们知道 v-model 本质上不过是语法糖，v-model 在内部为不同的输入元素使用不同的属性并抛出不同的事件：
+
+(1) v-bind:绑定响应式[数据](http://www.fly63.com/)
+(2) 触发 input 事件 并传递数据 (重点)
+
+- text 和 textarea 元素使用 value 属性和 input 事件；
+- checkbox 和 radio 使用 checked 属性和 change 事件；
+- select 字段将 value 作为 prop 并将 change 作为事件。
+
+以 input 表单元素为例：
+
+```
+<input v-model='something'>
+    
+相当于
+
+<input v-bind:value="something" v-on:input="something = $event.target.value">
+```
+
+如果在自定义组件中，v-model 默认会利用名为 value 的 prop 和名为 input 的事件，如下所示：
+
+```
+父组件：
+<ModelChild v-model="message"></ModelChild>
+
+子组件：
+<div>{{value}}</div>
+
+props:{
+    value: String
+},
+methods: {
+  test1(){
+     this.$emit('input', '小红')
+  },
+},
+```
+
+## 15,Vue 组件间通信有哪几种方式？
+
+Vue 组件间通信只要指以下 3 类通信：父子组件通信、隔代组件通信、兄弟组件通信
+
+**（1）`props / $emit`  适用 父子组件通信**
+
+这种方法是 Vue 组件的基础，相信大部分同学耳闻能详，所以此处就不举例展开介绍。
+
+**（2）`ref` 与 `$parent / $children` 适用 父子组件通信**
+
+- `ref`：如果在普通的 DOM 元素上使用，引用指向的就是 DOM 元素；如果用在子组件上，引用就指向组件实例
+- `$parent` / `$children`：访问父 / 子实例
+
+**（3）`EventBus （$emit / $on）`  适用于 父子、隔代、兄弟组件通信**
+
+这种方法通过一个空的 Vue 实例作为中央事件总线（事件中心），用它来触发事件和监听事件，从而实现任何组件间的通信，包括父子、隔代、兄弟组件。
+
+**（4）`$attrs`/`$listeners` 适用于 隔代组件通信**
+
+- `$attrs`：包含了父作用域中不被 prop 所识别 (且获取) 的特性绑定 ( class 和 style 除外 )。当一个组件没有声明任何 prop 时，这里会包含所有父作用域的绑定 ( class 和 style 除外 )，并且可以通过 `v-bind="$attrs"` 传入内部组件。通常配合 inheritAttrs 选项一起使用。
+- `$listeners`：包含了父作用域中的 (不含 .native 修饰器的)  v-on 事件监听器。它可以通过 `v-on="$listeners"` 传入内部组件
+
+**（5）`provide / inject` 适用于 隔代组件通信**
+
+祖先组件中通过 provider 来提供变量，然后在子孙组件中通过 inject 来注入变量。 provide / inject API 主要解决了跨级组件间的通信问题，不过它的使用场景，主要是子组件获取上级组件的状态，跨级组件间建立了一种主动提供与依赖注入的关系。
+
+**（6）Vuex  适用于 父子、隔代、兄弟组件通信**
+
+Vuex 是一个专为 Vue.js 应用程序开发的状态管理模式。每一个 Vuex 应用的核心就是 store（仓库）。“store” 基本上就是一个容器，它包含着你的应用中大部分的状态 ( state )。
+
+- Vuex 的状态存储是响应式的。当 Vue 组件从 store 中读取状态的时候，若 store 中的状态发生变化，那么相应的组件也会相应地得到高效更新。
+- 改变 store 中的状态的唯一途径就是显式地提交  (commit) mutation。这样使得我们可以方便地跟踪每一个状态的变化。
+
+## 16, Vuex
+
+Vuex 是一个专为 Vue.js 应用程序开发的状态管理模式。每一个 Vuex 应用的核心就是 store（仓库）。“store” 基本上就是一个容器，它包含着你的应用中大部分的状态 ( state )。
+
+（1）Vuex 的状态存储是响应式的。当 Vue 组件从 store 中读取状态的时候，若 store 中的状态发生变化，那么相应的组件也会相应地得到高效更新。
+
+（2）改变 store 中的状态的唯一途径就是显式地提交 (commit) mutation。这样使得我们可以方便地跟踪每一个状态的变化。
+
+主要包括以下几个模块：
+
+- State：定义了应用状态的数据结构，可以在这里设置默认的初始状态。
+- Getter：允许组件从 Store 中获取数据，mapGetters 辅助函数仅仅是将 store 中的 getter 映射到局部计算属性。
+- Mutation：是唯一更改 store 中状态的方法，且必须是同步函数。
+- Action：用于提交 mutation，而不是直接变更状态，可以包含任意异步操作。
+- Module：允许将单一的 Store 拆分为多个 store 且同时保存在单一的状态树中。
+
+## 17,Virtual DOM 作用是什么？
+
+​	其实虚拟DOM在Vue.js主要做了两件事：
+
+- 提供与真实DOM节点所对应的虚拟节点vnode
+- 将虚拟节点vnode和旧虚拟节点oldVnode进行对比，然后更新视图
+
+为何需要Virtual DOM？
+
+- 具备跨平台的优势
+
+由于 Virtual DOM 是以 JavaScript 对象为基础而不依赖真实平台环境，所以使它具有了跨平台的能力，比如说浏览器平台、Weex、Node 等。
+
+- 操作 DOM 慢，js运行效率高。我们可以将DOM对比操作放在JS层，提高效率。
+
+因为DOM操作的执行速度远不如Javascript的运算速度快，因此，把大量的DOM操作搬运到Javascript中，运用patching算法来计算出真正需要更新的节点，最大限度地减少DOM操作，从而显著提高性能。
+
+Virtual DOM 本质上就是在 JS 和 DOM 之间做了一个缓存。可以类比 CPU 和硬盘，既然硬盘这么慢，我们就在它们之间加个缓存：既然 DOM 这么慢，我们就在它们 JS 和 DOM 之间加个缓存。CPU（JS）只操作内存（Virtual DOM），最后的时候再把变更写入硬盘（DOM）
+
+- 提升渲染性能
+
+Virtual DOM的优势不在于单次的操作，而是在大量、频繁的数据更新下，能够对视图进行合理、高效的更新。
+
+为了实现高效的DOM操作，一套高效的虚拟DOM diff算法显得很有必要。**我们通过patch 的核心—-diff 算法，找出本次DOM需要更新的节点来更新，其他的不更新**。比如修改某个model 100次，从1加到100，那么有了Virtual DOM的缓存之后，只会把最后一次修改patch到view上。那diff 算法的实现过程是怎样的？
+
+## 18,vue-router的两种模式的区别
+
+**hash** —— 即地址栏 URL 中的 `#` 符号（此 hash 不是密码学里的散列运算）。
+比如这个 URL：`http://www.abc.com/#/hello`，hash 的值为 `#/hello`。它的特点在于：hash 虽然出现在 URL 中，但不会被包括在 HTTP 请求中，对后端完全没有影响，因此改变 hash 不会重新加载页面。
+
+**history** —— 利用了 HTML5 History Interface 中新增的 `pushState()` 和 `replaceState()` 方法。（需要特定浏览器支持）
+这两个方法应用于浏览器的历史记录栈，在当前已有的 `back`、`forward`、`go` 的基础之上，它们提供了对历史记录进行修改的功能。只是当它们执行修改时，虽然改变了当前的 URL，但浏览器不会立即向后端发送请求。
+
+## 19,为什么vue中的data要用return返回
+
+为什么vue中的data用return返回 1、为什么在项目中data需要使用return返回数据呢？ 不使用return包裹的数据会在项目的全局可见，会造成变量污染；使用return包裹后数据中变量只在当前组件中生效，不会影响其他组件。 #######当一个组件被定义， data 必须声明为返回一个初始数据对象的函数，因为组件可能被用来创建多个实例。如果 data 仍然是一个纯粹的对象，则所有的实例将共享引用同一个数据对象！通过提供 data 函数，每次创建一个新实例后，我们能够调用 data 函数，从而返回初始数据的一个全新副本数据对象。
+
+## 20,vuex中mutation/action的传参方式
+
+1、流程顺序
+
+“相应视图—>修改State”拆分成两部分，视图触发Action，Action再触发Mutation。
+
+2、角色定位
+
+基于流程顺序，二者扮演不同的角色。
+
+Mutation：专注于修改State，理论上是修改State的唯一途径。
+
+Action：业务代码、异步请求。
+
+3、限制
+
+角色不同，二者有不同的限制。
+
+Mutation：必须同步执行。
+
+Action：可以异步，但不能直接操作State。
+
+## 21,Vue中watch对象内属性的方法
+
+1.深度监测 deep
+
+里面的`deep`设为了`true`，这样的话，如果修改了监听对象中的任何一个属性，都会执行`handler`这个方法。不过这样会造成更多的性能开销，尤其是对象里面属性过多，结构嵌套过深的时候。而且有时候我们就只想关心这个对象中的某个特定属性，这个时候可以这样
+
+2,computed
+
+如果监听对象内的某一具体属性，可以通过computed做中间层来实现
+
+## 22,vue-动态组件和异步组件
+
+动态组件:Vue.js 提供了一个特殊的元素 <component> 用来动态地挂载不同的组件。如果我们打算在一个地方根据不同的状态引用不同的组件的话，比如tab页，就可以用到这一标签。
+
+```
+<template>
+  <div id="app">
+    <el-button-group>
+      <el-button type="primary" size="small" v-for="item in btnGroup" :key="item.id" @click="handleBtn(item.name)">{{item.name}}</el-button>
+    </el-button-group>
+    <div>
+      <keep-alive>
+        <component :is="curComponent"></component>
+      </keep-alive>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'App',
+  data () {
+    return {
+      curComponent: 'comA',
+      btnGroup: [
+        {
+          id: 1,
+          name: '组件一'
+        },
+        {
+          id: 2,
+          name: '组件二'
+        }
+      ]
+    }
+  },
+  components: {
+    comA: {
+      template: `<input placeholder="请输入名字" type="text"/>`
+    },
+    comB: {
+      template: `<p>2222222222</p>`
+    }
+  },
+  methods: {
+    handleBtn (name) {
+      if (name === '组件一') {
+        this.curComponent = 'comA'
+      }
+      if (name === '组件二') {
+        this.curComponent = 'comB'
+      }
+    }
+  }
+}
+</script>
+```
+
+异步组件:
+
+在大型应用中，我们可能需要将应用分割成小一些的代码块，并且只在需要的时候才从服务器加载一个模块。为了简化，`Vue` 允许你以一个工厂函数的方式定义你的组件，这个工厂函数会异步解析你的组件定义。**`Vue` 只有在这个组件需要被渲染的时候才会触发该工厂函数，且会把结果缓存起来供未来重渲染。**
+
+异步组件存在的意义在于加载一个体量很大的页面时，如果我们不设置加载的优先级的话，那么可能页面在加载视频等信息的时候会非常占用时间，然后主要信息就会阻塞在后面在加载。这对用户来说无疑不是一个很差的体验。但是如果我们设置加载的顺序，那么我们可以优先那些最重要的信息优先显示，优化了整个项目。
+
+# webpack
+
+## 1,打包原理
+
+1. 识别入口文件
+2. 通过逐层识别模块依赖(Commonjs、amd或者es6的import，webpack都会对其进行分析，来获取代码的依赖)
+3. webpack做的就是分析代码，转换代码，编译代码，输出代码
+4. 最终形成打包后的代码
+
+## 2,loder
+
+loader是文件加载器，能够加载资源文件，并对这些文件进行一些处理，诸如编译、压缩等，最终一起打包到指定的文件中
+
+1. 处理一个文件可以使用多个loader，loader的执行顺序和配置中的顺序是相反的，即最后一个loader最先执行，第一个loader最后执行
+2. 第一个执行的loader接收源文件内容作为参数，其它loader接收前一个执行的loader的返回值作为参数，最后执行的loader会返回此模块的JavaScript源码
+
+## 3,plugin
+
+在webpack运行的生命周期中会广播出许多事件，plugin可以监听这些事件，在合适的时机通过webpack提供的API改变输出结果。
+
+
+
+**loader和plugin的区别**:对于loader，它是一个转换器，将A文件进行编译形成B文件，这里操作的是文件，比如将A.scss转换为A.css，单纯的文件转换过程
+
+plugin是一个扩展器，它丰富了webpack本身，针对是loader结束后，webpack打包的整个过程，它并不直接操作文件，而是基于事件机制工作，会监听webpack打包过程中的某些节点，执行广泛的任务
